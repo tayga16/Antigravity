@@ -1,0 +1,34 @@
+name: Build ARM64 Binary
+
+on:
+  workflow_dispatch: # Запуск вручную по кнопке
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies & Cross-compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu pkg-config
+
+      - name: Install Rust & aarch64 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-gnu
+
+      - name: Install Cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build with Cross (ARM64)
+        run: |
+          cross build --release --target aarch64-unknown-linux-gnu
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ag_unlocker_arm64
+          path: target/aarch64-unknown-linux-gnu/release/ag_unlocker
